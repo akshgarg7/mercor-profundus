@@ -5,7 +5,7 @@ import random
 import urllib
 import streamlit as st
 import llm_openrouter as llm
-from add_to_airtable import insertion_wrapper
+from add_to_airtable import insertion_wrapper, set_to_wip, get_record_id_from_task_id
 
 st.set_page_config(page_title="Multi LLM Test Tool", layout="wide")
 
@@ -70,11 +70,11 @@ def get_llm_response(user_input: str) -> dict[llm.Model, llm.LLMResponse]:
             st.error("No models selected. Please select at least one model.")
             st.stop()
 
-        print(f"models: {models}")
-        print(f"prompt: {st.session_state.prompt}")
-        print(f"user_input: {user_input}")
-        print(f"temperature: {st.session_state.temperature}")
-        print(f"max_tokens: {st.session_state.max_tokens}")
+        # print(f"models: {models}")
+        # print(f"prompt: {st.session_state.prompt}")
+        # print(f"user_input: {user_input}")
+        # print(f"temperature: {st.session_state.temperature}")
+        # print(f"max_tokens: {st.session_state.max_tokens}")
         response = llm.chat_completion_multiple(
             models, st.session_state.prompt, user_input, st.session_state.temperature, st.session_state.max_tokens
         )
@@ -212,10 +212,10 @@ def log_evaluation_data(email, model_left, model_right, accuracy1, relevance1, c
         "Reason for Preference": [reason_for_preference],
         "Model 1 Output": [st.session_state['model_outputs'][0]],  # Store Model 1 output as a JSON string
         "Model 2 Output": [st.session_state['model_outputs'][1]],
-        'query': [default_query]
+        'query': [task_id]
     }
 
-    insertion_wrapper(int(default_query), email, model_left, model_right, accuracy1, relevance1, conciseness1, accuracy2, relevance2, conciseness2, preferred_model, st.session_state['model_outputs'][0], st.session_state['model_outputs'][1])
+    insertion_wrapper(st.session_state['record_id'], email, model_left, model_right, accuracy1, relevance1, conciseness1, accuracy2, relevance2, conciseness2, preferred_model, st.session_state['model_outputs'][0], st.session_state['model_outputs'][1])
     df = pd.DataFrame(data)
     
     # Check if the file exists to decide whether to write headers
@@ -230,8 +230,20 @@ def log_evaluation_data(email, model_left, model_right, accuracy1, relevance1, c
 query_params = st.experimental_get_query_params()
 
 # Assuming there's a 'query' parameter in the URL
-default_query = query_params.get("query", [""])[0]  # Get 'query' parameter, default to empty string if not present
-st.title(f"Mercor Data Collection Pilot ({default_query})")
+task_id = query_params.get("query", [""])[0]  # Get 'query' parameter, default to empty string if not present
+task_type = query_params.get("task_type", [""])[0] 
+language=query_params.get("language", [""])[0]
+using_framework=query_params.get("using_framework", [""])[0]
+frameworks_used = query_params.get("frameworks_used", [""])[0]
+
+st.title(f"Mercor Data Collection Pilot")
+st.markdown(f"**Task ID:** {task_id}")
+st.markdown(f"**Task Type:** {task_type}")
+st.markdown(f"**Language:** {language}")
+st.markdown(f"**Using Framework:** {using_framework}")
+st.markdown(f"**Frameworks Used:** {frameworks_used}")
+st.markdown("---")  # Add a horizontal line for better separation
+
 
 
 # At the top of your Streamlit app, after setting page configurations
@@ -253,6 +265,9 @@ read_and_agreed = True
 send_button = st.button("Send Request")
 
 if send_button:
+    st.session_state['record_id'] = get_record_id_from_task_id(int(task_id))
+    print(st.session_state['record_id'])
+    set_to_wip(st.session_state['record_id'])
     if not read_and_agreed:
         st.error("Please confirm that there is no private or sensitive information in your request")
         st.stop()

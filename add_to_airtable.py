@@ -28,13 +28,23 @@ def get_record_id_from_task_id(task_id):
     else:
         print("No record found")
 
+def set_to_wip(record_id):
+    data = {
+        "fields": {
+            "status": "in_progress"
+        }
+    }
+    update_url = f'https://api.airtable.com/v0/appCRqdHpEGeE1cE7/Tasks/{record_id}'
+    response = requests.patch(update_url, headers=headers, data=json.dumps(data))
+    print(response.text)
+
 # Design the data
 def prepare_data(labeler_email, model_left, model_right, model_1_accuracy_score, model_1_relevance_score, model_1_readability_score, model_2_accuracy_score, model_2_relevance_score, model_2_readability_score, preferred_model, model_1_output, model_2_output):
     return {
         "fields": {
             "labeler_email": labeler_email,
-            "model_left": model_left,
-            "model_right": model_right,
+            "model_1": model_left,
+            "model_2": model_right,
             "model_1_accuracy_score": model_1_accuracy_score,
             "model_1_relevance_score": model_1_relevance_score,
             "model_1_readability_score": model_1_readability_score,
@@ -53,10 +63,13 @@ def update_matching_record(record_id, data):
     response = requests.patch(update_url, headers=headers, data=json.dumps(data))
     print(response.text)
 
-def insertion_wrapper(task_id, labeler_email, model_left, model_right, model_1_accuracy_score, model_1_relevance_score, model_1_readability_score, model_2_accuracy_score, model_2_relevance_score, model_2_readability_score, preferred_model, model_1_output, model_2_output ):
-    record_id = get_record_id_from_task_id(task_id)
+def insertion_wrapper(record_id, labeler_email, model_left, model_right, model_1_accuracy_score, model_1_relevance_score, model_1_readability_score, model_2_accuracy_score, model_2_relevance_score, model_2_readability_score, preferred_model, model_1_output, model_2_output ):
+    # record_id = get_record_id_from_task_id(task_id)
     patch_data = prepare_data(labeler_email, model_left, model_right, model_1_accuracy_score, model_1_relevance_score, model_1_readability_score, model_2_accuracy_score, model_2_relevance_score, model_2_readability_score, preferred_model, model_1_output, model_2_output)
     update_matching_record(record_id, patch_data)
 
 if __name__ == "__main__":
-    insertion_wrapper(11, 'akshgarg@gmail.com', 'gpt-4o', 'gpt-4o', 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 'Model 1', 'output', 'output')
+    # insertion_wrapper(11, 'akshgarg@gmail.com', 'gpt-4o', 'gpt-4o', 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 'Model 1', 'output', 'output')
+
+    record_id = get_record_id_from_task_id(11)
+    set_to_wip(record_id)
