@@ -1,3 +1,6 @@
+Extended from https://github.com/fau-masters-collected-works-cgarbin/llm-comparison-tool
+
+
 # Comparing large language models
 
 This project allows us to test prompts against multiple large language models and compare the results.

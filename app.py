@@ -1,76 +1,80 @@
+import time
 import datetime
 import json
+import random
 
 import streamlit as st
 
 import llm_openrouter as llm
 
 st.set_page_config(page_title="Multi LLM Test Tool", layout="wide")
-st.title("Multi LLM Test Tool")
+st.title("Mercor Data Collection Pilot")
 
+# At the top of your Streamlit app, after setting page configurations
+email = st.text_input("Enter your email so we can compensate you fairly", "")
+
+specific_model_ids = [
+    'anthropic/claude-3.5-sonnet',
+    'google/gemini-flash-1.5',
+    'google/gemini-pro-1.5',
+    'openai/gpt-4o',
+    # Add other model IDs as needed
+]
+
+gemini_models = [
+    'google/gemini-flash-1.5',
+    'google/gemini-pro-1.5',
+]
 
 @st.cache_data
 def get_models():
     models = llm.available_models()
+    models = [model for model in models if model.id in specific_model_ids]
     models = sorted(models, key=lambda x: x.name)
     return models
 
 
 def prepare_session_state():
+    models = get_models()
+    gemini_models_parsed = [model for model in models if model.id in gemini_models]
+    first_model = random.choice(gemini_models_parsed)
+    remaining_models = [model for model in models if model.id != first_model.id]
+    second_model = random.choice(remaining_models)
     session_vars = {  # Default values
         "prompt": "",
         "temperature": 0.0,
         "max_tokens": 2048,
-        "models": [],
+        "models": [first_model, second_model],  # Select two models randomly
         "response": {},
         "cost_and_stats": {},
     }
+
     for var in session_vars:
         if var not in st.session_state:
             st.session_state[var] = session_vars[var]
 
 
 def configuration():
-    models = get_models()
-    st.session_state.prompt = st.text_area(
-        "System prompt",
-        value="You are a helpful assistant.",
-        placeholder="Enter here the system prompt",
-        height=120,
-    )
-    cols = st.columns([5, 2, 1])
-    with cols[0]:
-        st.session_state.models = st.multiselect("Model(s)", models, placeholder="Select one or more models")
-    with cols[1]:
-        st.session_state.temperature = st.slider("Temperature", 0.0, 1.0, 0.0)
-    with cols[2]:
-        st.session_state.max_tokens = st.number_input("Max completion tokens", 1, 20_480, 2048, step=10)
-
-    # Models are listed in the order the user selected them
-    # Sort the selected list by name to make them easier to find in the results
-    st.session_state.models = sorted(st.session_state.models, key=lambda x: x.name)
-
-    # Show all modes in a markdown table
-    with st.expander("Click to to show/hide model details"):
-        model_list = (
-            "| Model | ID | Prompt price | Completion price |"
-            "Context length | Max completion tokens | Tokenizer | Instruct type\n"
-            "| --- | --- | ---: | ---: | ---: | ---: | --- | --- |\n"
-        )
-        for model in models:
-            model_list += (
-                f"| {model.name} | {model.id} | {model.pricing_prompt:.10f} | {model.pricing_completion:.10f} |"
-                f"{model.context_length:,} | {model.max_completion_tokens:,} | {model.tokenizer} |"
-                f"{model.instruct_type} |\n"
-            )
-        st.markdown(model_list)
+    models = st.session_state.models
+    st.session_state.prompt = "You are a helpful assistant"
+    st.session_state.temperature = 0
+    st.session_state.max_tokens = 2048
 
 
 def get_llm_response(user_input: str) -> dict[llm.Model, llm.LLMResponse]:
     with st.spinner("Sending request..."):
         models = st.session_state.models
         if not isinstance(models, list):
-            models = [models]
+            models = [models]  # Ensure models is a list even if only one model is selected
+        if not models:
+            st.error("No models selected. Please select at least one model.")
+            st.stop()
+
+        print(f"models: {models}")
+        print(f"prompt: {st.session_state.prompt}")
+        print(f"user_input: {user_input}")
+        print(f"temperature: {st.session_state.temperature}")
+        print(f"max_tokens: {st.session_state.max_tokens}")
         response = llm.chat_completion_multiple(
             models, st.session_state.prompt, user_input, st.session_state.temperature, st.session_state.max_tokens
         )
@@ -91,37 +95,134 @@ def show_response(response: dict[llm.Model, llm.LLMResponse], cost_and_stats: di
     cols = st.columns(len(response))
     for i, (m, r) in enumerate(response.items()):
         with cols[i]:
-            st.markdown(f"### {m.name}")
-            with st.expander("Click to show/hide the raw response"):
-                st.write("LLM raw request data")
-                st.json(r.raw_request, expanded=False)
-                st.write("LLM raw response data")
-                st.json(r.raw_response, expanded=False)
-                st.write("Cost and stats raw response")
-                st.json(cost_and_stats[m].raw_response, expanded=False)
-            c = cost_and_stats[m]
-            st.markdown(
-                (
-                    "GPT tokens | Native tokens | Cost | Elapsed time |\n"
-                    "| --- | --- | --- | --- |\n"
-                    "| _(prompt/completion)_ | _(prompt/completion)_ | _(US $)_ | _(seconds)_ |\n"
-                    f"| {c.gpt_tokens_prompt}/{c.gpt_tokens_completion} |"
-                    f"{c.native_tokens_prompt}/{c.native_tokens_completion} |"
-                    f"{c.cost:.10f} | {r.elapsed_time:.1f}s |"
-                )
-            )
-            st.info(r.response)
+            st.markdown(f"### Model {i+1}")
+            st.markdown(f"""
+                <div style="border:2px solid #ccc; border-radius: 5px; padding: 10px; margin-top: 5px;">
+                    {r.response}
+                </div>
+            """, unsafe_allow_html=True) 
+            if 'model_outputs' not in st.session_state:
+                st.session_state['model_outputs'] = []
+            st.session_state['model_outputs'].append(r.response)
 
+
+def show_evaluation_form():
+    st.header("Evaluate the Responses")
+    col1, col2 = st.columns(2)
+
+    # Define the labels
+    labels = {
+        1: 'Really Bad',
+        2: 'Bad',
+        3: 'Average',
+        4: 'Good',
+        5: 'Excellent'
+    }
+
+    label_style = "font-size:20px;" 
+
+    with col1:
+        st.subheader("Model 1 Evaluation")
+        st.markdown(f"<div style='{label_style}'><b>Accuracy and Correctness of Code </b><br> Measures whether the response is technically correct and functions as expected. </div>", unsafe_allow_html=True)
+        accuracy1 = st.slider("", 1, 5, 3)
+        st.markdown(f"<div style='{label_style}'><b>Relevance and Completeness  </b><br> Assesses whether the response is relevant to the prompt and fully addresses the task requirements.</div>", unsafe_allow_html=True)
+        relevance1 = st.slider(" ", 1, 5, 3)
+        st.markdown(f"<div style='{label_style}'><b>Readability and Documentation </b><br> Assesses whether the response is easy to understand and maintain.</div>", unsafe_allow_html=True)
+        conciseness1 = st.slider("  ", 1, 5, 3)
+
+    with col2:
+        st.subheader("Model 2 Evaluation")
+
+        st.markdown(f"<div style='{label_style}'><b>Accuracy and Correctness of Code </b><br> Measures whether the response is technically correct and functions as expected. </div>", unsafe_allow_html=True)
+        accuracy2 = st.slider("   ", 1, 5, 3)
+        st.markdown(f"<div style='{label_style}'><b>Relevance and Completeness </b><br> Assesses whether the response is relevant to the prompt and fully addresses the task requirements.</div>", unsafe_allow_html=True)
+        relevance2 = st.slider("    ", 1, 5, 3)
+        st.markdown(f"<div style='{label_style}'><b>Readability and Documentation </b><br> Assesses whether the response is easy to understand and maintain.</div>", unsafe_allow_html=True)
+        conciseness2 = st.slider("     ", 1, 5, 3)
+
+    # Increase the font size for the "Which model do you prefer?" question using CSS
+    st.markdown("""
+    <style>
+        div[data-testid="stRadio"] > label > div {
+            font-size: 20px !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    st.subheader("Which model do you prefer?")
+    preferred_model = st.radio(
+        "",
+        ('Model 1', 'Model 2', "Both Good (Equal)", "Neither")
+    )
+
+    st.subheader("Reason for preference")
+    reason_for_preference = st.text_area("")
+
+    if st.button("Submit Evaluation (You will not be able to go back and modify your answers)"):
+        if reason_for_preference == "":
+            st.error("Please provide a reason for your preference before submitting.")
+        else:
+            st.write("You submitted:")
+            st.write(f"Model 1 - Accuracy: {labels[accuracy1]}, Relevance: {labels[relevance1]}, Conciseness: {labels[conciseness1]}")
+            st.write(f"Model 2 - Accuracy: {labels[accuracy2]}, Relevance: {labels[relevance2]}, Conciseness: {labels[conciseness2]}")
+            st.write(f"Preferred Model: {preferred_model}")
+            st.write(f"Reason for preference: {reason_for_preference}")
+
+            # Here you can log the data to a file or database
+            log_evaluation_data(email, st.session_state.models[0].name, st.session_state.models[1].name, accuracy1, relevance1, conciseness1, accuracy2, relevance2, conciseness2, preferred_model, reason_for_preference)
+
+            st.session_state['prompt'] = ""
+            st.session_state['temperature'] = 0.0
+            st.session_state['max_tokens'] = 2048
+            st.session_state['models'] = random.sample(get_models(), 2)  # Reselect two random models
+            st.session_state['response'] = {}
+            st.session_state['cost_and_stats'] = {}
+            st.session_state['model_outputs'] = []
+            
+            # Display a success message
+            st.success("Evaluation submitted successfully. Fields will reset in 5 seconds.")
+            time.sleep(5)
+            st.experimental_rerun()
+
+import pandas as pd
+import os
+
+def log_evaluation_data(email, model_left, model_right, accuracy1, relevance1, conciseness1, accuracy2, relevance2, conciseness2, preferred_model, reason_for_preference):
+    # Define the path for the CSV file
+    csv_file_path = 'evaluation_data.csv'
+    
+    # Create a DataFrame from the input data
+    data = {
+        "Email": [email],
+        "Model Left": [model_left],
+        "Model Right": [model_right],
+        "Model 1 Accuracy": [accuracy1],
+        "Model 1 Relevance": [relevance1],
+        "Model 1 Conciseness": [conciseness1],
+        "Model 2 Accuracy": [accuracy2],
+        "Model 2 Relevance": [relevance2],
+        "Model 2 Conciseness": [conciseness2],
+        "Preferred Model": [preferred_model],
+        "Reason for Preference": [reason_for_preference],
+        "Model 1 Output": [st.session_state['model_outputs'][0]],  # Store Model 1 output as a JSON string
+        "Model 2 Output": [st.session_state['model_outputs'][1]] 
+    }
+    df = pd.DataFrame(data)
+    
+    # Check if the file exists to decide whether to write headers
+    if os.path.isfile(csv_file_path):
+        # File exists, append without writing the header
+        df.to_csv(csv_file_path, mode='a', header=False, index=False)
+    else:
+        # File does not exist, write with the header
+        df.to_csv(csv_file_path, mode='w', header=True, index=False)
 
 prepare_session_state()
+
 configuration()
 
-user_input = st.text_area("Enter your request", placeholder="Enter here the user request", height=100)
-st.error(
-    ":no_entry_sign: Do not enter private or sensitive information. What you type here is going to external servers."
-)
-
-read_and_agreed = st.checkbox("There is no private or sensitive information in my request")
+user_input = st.text_area("Input Prompt", placeholder="Enter the prompt here", height=100)
+read_and_agreed = True
 send_button = st.button("Send Request")
 
 if send_button:
@@ -135,11 +236,6 @@ if send_button:
         st.error("Please enter a request")
         st.stop()
 
-    # Because the download button (below) reruns the entire page (as all of the Streamlit widgets do), we need to
-    # save the results in the session state to show them again after the download button is clicked
-    # References:
-    #  - https://github.com/streamlit/streamlit/issues/3832
-    #  - https://discuss.streamlit.io/t/download-button-reloads-app-and-results-output-is-gone-and-need-to-re-run/51467
     st.session_state.response = get_llm_response(user_input)
     st.session_state.cost_and_stats = get_cost_and_stats(st.session_state.response)
 
@@ -154,9 +250,5 @@ if st.session_state.response:
             "cost_and_stats": st.session_state.cost_and_stats[model].to_dict(),
         }
     response_json = json.dumps(response_json, indent=4)
-    st.download_button(
-        label="Download JSON File",
-        data=response_json,
-        file_name=f"llm-comparison-{datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}",
-        mime="application/json",
-    )
+
+    show_evaluation_form()
