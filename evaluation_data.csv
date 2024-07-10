@@ -1,0 +1,80 @@
+Model Left,Model Right,Model 1 Accuracy,Model 1 Relevance,Model 1 Conciseness,Model 2 Accuracy,Model 2 Relevance,Model 2 Conciseness,Preferred Model,Reason for Preference
+Google: Gemini Flash 1.5,OpenAI: GPT-4o,5,5,5,5,5,5,Model 1,just felt like it
+Google: Gemini Flash 1.5,Anthropic: Claude 3.5 Sonnet,3,3,3,3,3,3,Model 1,
+Google: Gemini Flash 1.5,Anthropic: Claude 3.5 Sonnet,4,3,3,3,3,3,Model 1,
+Google: Gemini Flash 1.5,OpenAI: GPT-4o,3,3,3,3,3,3,Both Good (Equal),just felt like it
+Google: Gemini Flash 1.5,Google: Gemini Pro 1.5,3,3,3,3,3,3,Model 1,
+Google: Gemini Flash 1.5,Google: Gemini Pro 1.5,2,3,3,3,3,3,Model 2,lk;hjkl
+
+OpenAI: GPT-4o,Google: Gemini Pro 1.5,3,3,3,3,3,3,Model 1,jf;lkjdlkj l;dajk df;jk sdlkfj
+Google: Gemini Pro 1.5,Google: Gemini Flash 1.5,3,3,3,3,3,3,Model 1,right one is horrible
+Anthropic: Claude 3.5 Sonnet,Google: Gemini Flash 1.5,3,3,3,3,3,3,Model 1,asdf,"I apologize, but ""asdf"" doesn't have any specific meaning. It's often used as a nonsensical sequence of letters, typically found on the home row of a QWERTY keyboard. 
+
+Is there something specific you'd like to ask or discuss? I'd be happy to help with any questions or topics you might have in mind.","I'm here to help!  What can I do for you today? 😊 
+"
+Anthropic: Claude 3.5 Sonnet,Google: Gemini Flash 1.5,3,3,3,3,3,3,Model 1,asdf,"I apologize, but ""asdf"" doesn't have any specific meaning. It's often used as a nonsensical sequence of letters, typically found on the home row of a QWERTY keyboard. 
+
+Is there something specific you'd like to ask or discuss? I'd be happy to help with any questions or topics you might have in mind.","I'm here to help!  What can I do for you today? 😊 
+"
+Anthropic: Claude 3.5 Sonnet,Google: Gemini Flash 1.5,3,3,3,3,3,3,Both Good (Equal),asdf,"I apologize, but ""asdf"" doesn't have any specific meaning. It's often used as a nonsensical sequence of letters, typically found on the home row of a QWERTY keyboard. 
+
+Is there something specific you'd like to ask or discuss? I'd be happy to help with any questions or topics you might have in mind.","I'm here to help!  What can I do for you today? 😊 
+"
+OpenAI: GPT-4o,Anthropic: Claude 3.5 Sonnet,3,3,3,3,3,3,Model 1,adsf,"I apologize, but ""asdf"" doesn't have any specific meaning. It's often used as a nonsensical sequence of letters, typically found on the home row of a QWERTY keyboard. 
+
+Is there something specific you'd like to ask or discuss? I'd be happy to help with any questions or topics you might have in mind.","It looks like you typed ""asdf."" How can I assist you today? If you have any questions or need help with something specific, feel free to let me know!"
+Anthropic: Claude 3.5 Sonnet,OpenAI: GPT-4o,3,3,3,3,3,3,Model 1,asdf,"I apologize, but I'm not able to understand your input. It appears to be a random string of characters. Could you please rephrase your question or provide more context? I'm here to help, but I need a clear question or statement to work with.",It looks like your message got a bit jumbled. How can I assist you today?
+Anthropic: Claude 3.5 Sonnet,OpenAI: GPT-4o,3,3,3,3,3,3,Model 1,asdf,"I apologize, but I don't have any previous context or information about what you're referring to with ""try 2"". Could you please provide more details or ask a specific question? I'd be happy to help if you can give me more information about what you'd like assistance with.",Of course! How can I assist you today?
+Google: Gemini Flash 1.5,Anthropic: Claude 3.5 Sonnet,3,3,3,3,3,3,Model 1,try 3,"I apologize, but I don't have any previous context or information about what you're referring to with ""try 2"". Could you please provide more details or ask a specific question? I'd be happy to help if you can give me more information about what you'd like assistance with.","Please provide me with more context! What do you want me to try 2 of? 
+
+For example, you could say:
+
+* ""Try 2 different ways to solve this math problem.""
+* ""Try 2 different recipes for chocolate chip cookies.""
+* ""Try 2 different ways to explain this concept.""
+
+The more information you give me, the better I can help you! 😊 
+"
+,Google: Gemini Pro 1.5,Anthropic: Claude 3.5 Sonnet,3,3,3,3,3,3,Both Good (Equal),ljhlkj,"I apologize, but I'm not able to understand your message. It appears to be a random string of characters. Could you please rephrase your question or statement in a clear, understandable way? I'd be happy to help you with any information or assistance you need.","It seems like you've entered a random string of characters. Is there anything specific I can help you with? 😊 
+
+Let me know if you have a question, need information, or want to try something fun! I'm here to assist. 👍 
+"
+akshgarg@gmail.com,Google: Gemini Flash 1.5,OpenAI: GPT-4o,3,3,3,3,3,3,Model 1,daFA,"It seems like you might have accidentally typed some random characters. Is there anything specific you'd like me to help you with? 😊 
+","It looks like your message got a bit jumbled. How can I assist you today? If you have any questions or need help with something specific, feel free to let me know!"
+sid@mercor.com,Google: Gemini Pro 1.5,Google: Gemini Flash 1.5,3,3,3,3,3,3,Neither,adfdasfsa,"Please provide me with the code you want me to format! I need to know what language it is and what you want me to do with it. 
+
+For example, you could say:
+
+* ""Here is some Python code, can you format it properly?""
+* ""I have some JavaScript code, can you add comments to explain what it does?""
+* ""This is a C++ function, can you make it more readable?""
+
+Once you give me the code and instructions, I'll be happy to help! 
+","Please provide me with the following information so I can write and format code for you:
+
+* **Programming language:** Which language should I use (e.g., Python, JavaScript, Java, C++)?
+* **Purpose of the code:** What should the code do? Please be specific. 
+* **Desired input and output:** What kind of input will the code receive, and what output should it produce?
+* **Any specific requirements or constraints:** Are there any specific libraries or functions I should use? Any limitations on memory or processing time?
+
+Once I have this information, I can write the code and format it according to the conventions of the chosen programming language. 
+"
+ljksadfjkl,Google: Gemini Pro 1.5,OpenAI: GPT-4o,3,3,3,3,3,3,Model 1,f,"It seems like you're typing gibberish!  😁 
+
+Is there anything specific I can help you with?  Perhaps you were testing your keyboard, or maybe you have a secret code you'd like to try out?  Let me know! 
+",It looks like you might have typed some random characters. How can I assist you today?
+ljksadfjkl,Google: Gemini Pro 1.5,OpenAI: GPT-4o,3,3,3,3,3,3,Model 1,f,"It seems like you're typing randomly!  😁 
+
+Is there anything I can help you with? I'm ready for a real question or task! 😊 
+",It looks like you might have typed some random characters. How can I assist you today?
+l;aksdjf,OpenAI: GPT-4o,Google: Gemini Pro 1.5,3,4,2,4,5,2,Model 2,;lkjdfg,"It seems like you've typed a random string of letters. Is there anything specific you'd like me to do with ""a;lkj""? 
+
+I can help with a variety of tasks, such as:
+
+* **Answering questions**
+* **Providing information**
+* **Generating creative content**
+* **Translating languages** 
+
+Let me know how I can assist you! 😊 
+",It looks like your message got cut off or may have been typed accidentally. How can I assist you today?,your search term

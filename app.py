@@ -2,16 +2,14 @@ import time
 import datetime
 import json
 import random
+import urllib
 
 import streamlit as st
 
 import llm_openrouter as llm
 
 st.set_page_config(page_title="Multi LLM Test Tool", layout="wide")
-st.title("Mercor Data Collection Pilot")
 
-# At the top of your Streamlit app, after setting page configurations
-email = st.text_input("Enter your email so we can compensate you fairly", "")
 
 specific_model_ids = [
     'anthropic/claude-3.5-sonnet',
@@ -40,6 +38,9 @@ def prepare_session_state():
     first_model = random.choice(gemini_models_parsed)
     remaining_models = [model for model in models if model.id != first_model.id]
     second_model = random.choice(remaining_models)
+
+    # randomly permute [first_model, second_model]
+    first_model, second_model = random.sample([first_model, second_model], 2)
     session_vars = {  # Default values
         "prompt": "",
         "temperature": 0.0,
@@ -124,21 +125,27 @@ def show_evaluation_form():
     with col1:
         st.subheader("Model 1 Evaluation")
         st.markdown(f"<div style='{label_style}'><b>Accuracy and Correctness of Code </b><br> Measures whether the response is technically correct and functions as expected. </div>", unsafe_allow_html=True)
-        accuracy1 = st.slider("", 1, 5, 3)
+        accuracy1 = st.slider("", 1, 5, key="accuracy1")
+        accuracy1_confirm = st.checkbox("Confirm Accuracy", key="accuracy1_confirm")
         st.markdown(f"<div style='{label_style}'><b>Relevance and Completeness  </b><br> Assesses whether the response is relevant to the prompt and fully addresses the task requirements.</div>", unsafe_allow_html=True)
-        relevance1 = st.slider(" ", 1, 5, 3)
+        relevance1 = st.slider(" ", 1, 5, key="relevance1")
+        relevance1_confirm = st.checkbox("Confirm Relevance", key="relevance1_confirm")
         st.markdown(f"<div style='{label_style}'><b>Readability and Documentation </b><br> Assesses whether the response is easy to understand and maintain.</div>", unsafe_allow_html=True)
-        conciseness1 = st.slider("  ", 1, 5, 3)
+        conciseness1 = st.slider("  ", 1, 5, key="conciseness1")
+        conciseness1_confirm = st.checkbox("Confirm Conciseness", key="conciseness1_confirm")
 
     with col2:
         st.subheader("Model 2 Evaluation")
 
         st.markdown(f"<div style='{label_style}'><b>Accuracy and Correctness of Code </b><br> Measures whether the response is technically correct and functions as expected. </div>", unsafe_allow_html=True)
-        accuracy2 = st.slider("   ", 1, 5, 3)
+        accuracy2 = st.slider("   ", 1, 5, key="accuracy2")
+        accuracy2_confirm = st.checkbox("Confirm Accuracy", key="accuracy2_confirm")
         st.markdown(f"<div style='{label_style}'><b>Relevance and Completeness </b><br> Assesses whether the response is relevant to the prompt and fully addresses the task requirements.</div>", unsafe_allow_html=True)
-        relevance2 = st.slider("    ", 1, 5, 3)
+        relevance2 = st.slider("    ", 1, 5, key="relevance2")
+        relevance2_confirm = st.checkbox("Confirm Relevance", key="relevance2_confirm")
         st.markdown(f"<div style='{label_style}'><b>Readability and Documentation </b><br> Assesses whether the response is easy to understand and maintain.</div>", unsafe_allow_html=True)
-        conciseness2 = st.slider("     ", 1, 5, 3)
+        conciseness2 = st.slider("     ", 1, 5, key="conciseness2")
+        conciseness2_confirm = st.checkbox("Confirm Conciseness", key="conciseness2_confirm")
 
     # Increase the font size for the "Which model do you prefer?" question using CSS
     st.markdown("""
@@ -159,8 +166,8 @@ def show_evaluation_form():
     reason_for_preference = st.text_area("")
 
     if st.button("Submit Evaluation (You will not be able to go back and modify your answers)"):
-        if reason_for_preference == "":
-            st.error("Please provide a reason for your preference before submitting.")
+        if reason_for_preference == "" or not (accuracy1_confirm and relevance1_confirm and conciseness1_confirm and accuracy2_confirm and relevance2_confirm and conciseness2_confirm):
+            st.error("Please confirm all selections and provide a reason for your preference before submitting.")
         else:
             st.write("You submitted:")
             st.write(f"Model 1 - Accuracy: {labels[accuracy1]}, Relevance: {labels[relevance1]}, Conciseness: {labels[conciseness1]}")
@@ -205,7 +212,8 @@ def log_evaluation_data(email, model_left, model_right, accuracy1, relevance1, c
         "Preferred Model": [preferred_model],
         "Reason for Preference": [reason_for_preference],
         "Model 1 Output": [st.session_state['model_outputs'][0]],  # Store Model 1 output as a JSON string
-        "Model 2 Output": [st.session_state['model_outputs'][1]] 
+        "Model 2 Output": [st.session_state['model_outputs'][1]],
+        'query': [default_query]
     }
     df = pd.DataFrame(data)
     
@@ -216,6 +224,24 @@ def log_evaluation_data(email, model_left, model_right, accuracy1, relevance1, c
     else:
         # File does not exist, write with the header
         df.to_csv(csv_file_path, mode='w', header=True, index=False)
+
+# Parse URL parameters
+query_params = st.experimental_get_query_params()
+
+# Assuming there's a 'query' parameter in the URL
+default_query = query_params.get("query", [""])[0]  # Get 'query' parameter, default to empty string if not present
+st.title(f"Mercor Data Collection Pilot ({default_query})")
+
+
+# At the top of your Streamlit app, after setting page configurations
+email = st.text_input("Enter your email so we can compensate you fairly", "")
+
+
+# Use the default_query as the default value in a text input
+# display the query text
+# st.write(f"Query: {default_query}")
+
+# user_input = st.text_input("Enter your query:", value=default_query)
 
 prepare_session_state()
 
@@ -237,7 +263,7 @@ if send_button:
         st.stop()
 
     st.session_state.response = get_llm_response(user_input)
-    st.session_state.cost_and_stats = get_cost_and_stats(st.session_state.response)
+    # st.session_state.cost_and_stats = get_cost_and_stats(st.session_state.response)
 
 if st.session_state.response:
     show_response(st.session_state.response, st.session_state.cost_and_stats)
@@ -247,8 +273,9 @@ if st.session_state.response:
     for model, response in st.session_state.response.items():
         response_json[model.name] = {
             "response": response.to_dict(),
-            "cost_and_stats": st.session_state.cost_and_stats[model].to_dict(),
+            # "cost_and_stats": st.session_state.cost_and_stats[model].to_dict(),
         }
     response_json = json.dumps(response_json, indent=4)
 
     show_evaluation_form()
+
