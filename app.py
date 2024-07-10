@@ -212,6 +212,7 @@ def log_evaluation_data(email, model_left, model_right, accuracy1, relevance1, c
         "Reason for Preference": [reason_for_preference],
         "Model 1 Output": [st.session_state['model_outputs'][0]],  # Store Model 1 output as a JSON string
         "Model 2 Output": [st.session_state['model_outputs'][1]],
+        "status": ["submitted"],
         'query': [task_id]
     }
 
