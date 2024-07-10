@@ -3,10 +3,9 @@ import datetime
 import json
 import random
 import urllib
-
 import streamlit as st
-
 import llm_openrouter as llm
+from add_to_airtable import insertion_wrapper
 
 st.set_page_config(page_title="Multi LLM Test Tool", layout="wide")
 
@@ -159,7 +158,7 @@ def show_evaluation_form():
     st.subheader("Which model do you prefer?")
     preferred_model = st.radio(
         "",
-        ('Model 1', 'Model 2', "Both Good (Equal)", "Neither")
+        ('Model 1', 'Model 2', "Equal (Both Good)", "Equal (Both Bad)")
     )
 
     st.subheader("Reason for preference")
@@ -215,6 +214,8 @@ def log_evaluation_data(email, model_left, model_right, accuracy1, relevance1, c
         "Model 2 Output": [st.session_state['model_outputs'][1]],
         'query': [default_query]
     }
+
+    insertion_wrapper(int(default_query), email, model_left, model_right, accuracy1, relevance1, conciseness1, accuracy2, relevance2, conciseness2, preferred_model, st.session_state['model_outputs'][0], st.session_state['model_outputs'][1])
     df = pd.DataFrame(data)
     
     # Check if the file exists to decide whether to write headers
