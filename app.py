@@ -125,7 +125,7 @@ def show_response(response: dict[llm.Model, llm.LLMResponse], cost_and_stats: di
         # print(f'model_a_response: {model_a_response}')
         # print(f'model_b_response: {model_b_response}')
         # print(f'model_c_response: {model_c_response}')
-        log_evaluation_data(email, model_a_name, model_b_name, model_c_name, model_a_response, model_b_response, model_c_response)
+        # log_evaluation_data(email, model_a_name, model_b_name, model_c_name, model_a_response, model_b_response, model_c_response)
 
 
 def show_evaluation_form():
@@ -185,6 +185,8 @@ def show_evaluation_form():
 
     st.subheader("Reason for preference")
     reason_for_preference = st.text_area("")
+
+    st.markdown("<br><br>", unsafe_allow_html=True)
 
     if st.button("Submit Evaluation (You will not be able to go back and modify your answers)"):
         if reason_for_preference == "" or not (accuracy1_confirm and relevance1_confirm and conciseness1_confirm and accuracy2_confirm and relevance2_confirm and conciseness2_confirm):
@@ -276,7 +278,7 @@ st.markdown("---")  # Add a horizontal line for better separation
 
 
 # At the top of your Streamlit app, after setting page configurations
-email = st.text_input("Enter your email so we can compensate you fairly", "")
+# email = st.text_input("Enter your email so we can compensate you fairly", "")
 
 
 # Use the default_query as the default value in a text input
@@ -295,7 +297,6 @@ send_button = st.button("Send Request")
 
 if send_button:
     st.session_state['record_id'] = get_record_id_from_task_id([int(task_id)])
-    print(st.session_state['record_id'])
     # set_to_wip(st.session_state['record_id'])
     if not read_and_agreed:
         st.error("Please confirm that there is no private or sensitive information in your request")
