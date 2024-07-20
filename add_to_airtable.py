@@ -59,7 +59,7 @@ def insertion_wrapper(record_id, model_a, model_b, model_c, model_a_response, mo
 if __name__ == "__main__":
 
     record_id = get_record_id_from_task_id([1])
-    insertion_wrapper(record_id, 'gemini', 'gpt-4o', 'claude', 'output a', 'output b', 'output c')
+    insertion_wrapper(record_id, 'gemini', 'gpt-4o', 'claude', 'output a that i just generated', 'output b', 'output c')
 
     # set_to_wip(record_id)
 

@@ -141,7 +141,7 @@ def show_response(response: dict[llm.Model, llm.LLMResponse], cost_and_stats: di
         # print(f'model_a_response: {model_a_response}')
         # print(f'model_b_response: {model_b_response}')
         # print(f'model_c_response: {model_c_response}')
-        # log_evaluation_data(email, model_a_name, model_b_name, model_c_name, model_a_response, model_b_response, model_c_response)
+        log_evaluation_data(model_a_name, model_b_name, model_c_name, model_a_response, model_b_response, model_c_response)
 
 
 def show_evaluation_form():
@@ -215,7 +215,7 @@ def show_evaluation_form():
             st.write(f"Reason for preference: {reason_for_preference}")
 
             # Here you can log the data to a file or database
-            log_evaluation_data(email, st.session_state.models[0].name, st.session_state.models[1].name, accuracy1, relevance1, conciseness1, accuracy2, relevance2, conciseness2, preferred_model, reason_for_preference)
+            log_evaluation_data(st.session_state.models[0].name, st.session_state.models[1].name, accuracy1, relevance1, conciseness1, accuracy2, relevance2, conciseness2, preferred_model, reason_for_preference)
 
             st.session_state['prompt'] = ""
             st.session_state['temperature'] = 0.0
@@ -233,7 +233,7 @@ def show_evaluation_form():
 import pandas as pd
 import os
 
-def log_evaluation_data(email, model_a, model_b, model_c, model_a_response, model_b_response, model_c_response):
+def log_evaluation_data(model_a, model_b, model_c, model_a_response, model_b_response, model_c_response):
     insertion_wrapper(st.session_state['record_id'], model_a, model_b, model_c, model_a_response, model_b_response, model_c_response)
 
 # def log_evaluation_data(email, model_left, model_right, accuracy1, relevance1, conciseness1, accuracy2, relevance2, conciseness2, preferred_model, reason_for_preference):
