@@ -12,14 +12,13 @@ st.set_page_config(page_title="Multi LLM Test Tool", layout="wide")
 
 specific_model_ids = [
     'anthropic/claude-3.5-sonnet',
-    'google/gemini-flash-1.5',
     'google/gemini-pro-1.5',
     'openai/gpt-4o',
     # Add other model IDs as needed
 ]
 
 gemini_models = [
-    'google/gemini-flash-1.5',
+    # 'google/gemini-flash-1.5',
     'google/gemini-pro-1.5',
 ]
 
@@ -37,6 +36,9 @@ def prepare_session_state():
     first_model = random.choice(gemini_models_parsed)
     remaining_models = [model for model in models if model.id != first_model.id]
     second_model = random.choice(remaining_models)
+    picked_models = set([first_model, second_model])
+    remaining_models = set(models) - picked_models
+    third_model = random.choice(list(remaining_models))
 
     # randomly permute [first_model, second_model]
     first_model, second_model = random.sample([first_model, second_model], 2)
@@ -45,6 +47,7 @@ def prepare_session_state():
         "temperature": 0.0,
         "max_tokens": 2048,
         "models": [first_model, second_model],  # Select two models randomly
+        "third_model": third_model,
         "response": {},
         "cost_and_stats": {},
     }
@@ -104,6 +107,25 @@ def show_response(response: dict[llm.Model, llm.LLMResponse], cost_and_stats: di
             if 'model_outputs' not in st.session_state:
                 st.session_state['model_outputs'] = []
             st.session_state['model_outputs'].append(r.response)
+
+    if st.button("Submit Evaluation (This will log your answers to airtable, please make sure at least one model is failing)"):
+        model_c_response = llm.chat_completion_multiple(
+            [st.session_state.third_model], st.session_state.prompt, user_input, st.session_state.temperature, st.session_state.max_tokens
+        )
+        model_c_response = model_c_response[st.session_state.third_model].response
+        model_a_name = st.session_state.models[0].name
+        model_b_name = st.session_state.models[1].name
+        model_c_name = st.session_state.third_model.name
+        model_a_response = st.session_state.response[st.session_state.models[0]].response
+        model_b_response = st.session_state.response[st.session_state.models[1]].response
+
+        # print(f'model_a_name: {model_a_name}')
+        # print(f'model_b_name: {model_b_name}')
+        # print(f'model_c_name: {model_c_name}')
+        # print(f'model_a_response: {model_a_response}')
+        # print(f'model_b_response: {model_b_response}')
+        # print(f'model_c_response: {model_c_response}')
+        log_evaluation_data(email, model_a_name, model_b_name, model_c_name, model_a_response, model_b_response, model_c_response)
 
 
 def show_evaluation_form():
@@ -193,39 +215,42 @@ def show_evaluation_form():
 import pandas as pd
 import os
 
-def log_evaluation_data(email, model_left, model_right, accuracy1, relevance1, conciseness1, accuracy2, relevance2, conciseness2, preferred_model, reason_for_preference):
-    # Define the path for the CSV file
-    csv_file_path = 'evaluation_data.csv'
-    
-    # Create a DataFrame from the input data
-    data = {
-        "Email": [email],
-        "Model Left": [model_left],
-        "Model Right": [model_right],
-        "Model 1 Accuracy": [accuracy1],
-        "Model 1 Relevance": [relevance1],
-        "Model 1 Conciseness": [conciseness1],
-        "Model 2 Accuracy": [accuracy2],
-        "Model 2 Relevance": [relevance2],
-        "Model 2 Conciseness": [conciseness2],
-        "Preferred Model": [preferred_model],
-        "Reason for Preference": [reason_for_preference],
-        "Model 1 Output": [st.session_state['model_outputs'][0]],  # Store Model 1 output as a JSON string
-        "Model 2 Output": [st.session_state['model_outputs'][1]],
-        "status": ["submitted"],
-        'query': [task_id]
-    }
+def log_evaluation_data(email, model_a, model_b, model_c, model_a_response, model_b_response, model_c_response):
+    insertion_wrapper(st.session_state['record_id'], model_a, model_b, model_c, model_a_response, model_b_response, model_c_response)
 
-    insertion_wrapper(st.session_state['record_id'], email, model_left, model_right, accuracy1, relevance1, conciseness1, accuracy2, relevance2, conciseness2, preferred_model, st.session_state['model_outputs'][0], st.session_state['model_outputs'][1])
-    df = pd.DataFrame(data)
+# def log_evaluation_data(email, model_left, model_right, accuracy1, relevance1, conciseness1, accuracy2, relevance2, conciseness2, preferred_model, reason_for_preference):
+#     # Define the path for the CSV file
+#     csv_file_path = 'evaluation_data.csv'
     
-    # Check if the file exists to decide whether to write headers
-    if os.path.isfile(csv_file_path):
-        # File exists, append without writing the header
-        df.to_csv(csv_file_path, mode='a', header=False, index=False)
-    else:
-        # File does not exist, write with the header
-        df.to_csv(csv_file_path, mode='w', header=True, index=False)
+#     # Create a DataFrame from the input data
+#     data = {
+#         "Email": [email],
+#         "Model Left": [model_left],
+#         "Model Right": [model_right],
+#         "Model 1 Accuracy": [accuracy1],
+#         "Model 1 Relevance": [relevance1],
+#         "Model 1 Conciseness": [conciseness1],
+#         "Model 2 Accuracy": [accuracy2],
+#         "Model 2 Relevance": [relevance2],
+#         "Model 2 Conciseness": [conciseness2],
+#         "Preferred Model": [preferred_model],
+#         "Reason for Preference": [reason_for_preference],
+#         "Model 1 Output": [st.session_state['model_outputs'][0]],  # Store Model 1 output as a JSON string
+#         "Model 2 Output": [st.session_state['model_outputs'][1]],
+#         "status": ["submitted"],
+#         'query': [task_id]
+#     }
+
+#     insertion_wrapper(st.session_state['record_id'], email, model_left, model_right, accuracy1, relevance1, conciseness1, accuracy2, relevance2, conciseness2, preferred_model, st.session_state['model_outputs'][0], st.session_state['model_outputs'][1])
+#     df = pd.DataFrame(data)
+    
+#     # Check if the file exists to decide whether to write headers
+#     if os.path.isfile(csv_file_path):
+#         # File exists, append without writing the header
+#         df.to_csv(csv_file_path, mode='a', header=False, index=False)
+#     else:
+#         # File does not exist, write with the header
+#         df.to_csv(csv_file_path, mode='w', header=True, index=False)
 
 # Parse URL parameters
 query_params = st.experimental_get_query_params()
@@ -236,6 +261,9 @@ task_type = query_params.get("task_type", [""])[0]
 language=query_params.get("language", [""])[0]
 using_framework=query_params.get("using_framework", [""])[0]
 frameworks_used = query_params.get("frameworks_used", [""])[0]
+
+
+task_id = 1
 
 st.title(f"Mercor Data Collection Pilot")
 st.markdown(f"**Task ID:** {task_id}")
@@ -266,9 +294,9 @@ read_and_agreed = True
 send_button = st.button("Send Request")
 
 if send_button:
-    st.session_state['record_id'] = get_record_id_from_task_id(int(task_id))
+    st.session_state['record_id'] = get_record_id_from_task_id([int(task_id)])
     print(st.session_state['record_id'])
-    set_to_wip(st.session_state['record_id'])
+    # set_to_wip(st.session_state['record_id'])
     if not read_and_agreed:
         st.error("Please confirm that there is no private or sensitive information in your request")
         st.stop()
@@ -280,6 +308,8 @@ if send_button:
         st.stop()
 
     st.session_state.response = get_llm_response(user_input)
+    # st.session_state['model1_response'] = st.session_state.response[st.session_state.models[0]]
+    # st.session_state['model2_response'] = st.session_state.response[st.session_state.models[1]]
     # st.session_state.cost_and_stats = get_cost_and_stats(st.session_state.response)
 
 if st.session_state.response:
@@ -294,5 +324,5 @@ if st.session_state.response:
         }
     response_json = json.dumps(response_json, indent=4)
 
-    show_evaluation_form()
+    # show_evaluation_form()
 

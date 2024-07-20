@@ -6,27 +6,21 @@ import os
 dotenv.load_dotenv()
 
 # API URL and headers
-url = 'https://api.airtable.com/v0/appCRqdHpEGeE1cE7/Tasks'
+url = 'https://api.airtable.com/v0/appv7hUQouIL8ckzC/Writing%20Subtask?maxRecords=3&view=Grid%20view'
 headers = {
     'Authorization': 'Bearer ' + os.getenv('AIRTABLE_API_KEY'),
     'Content-Type': 'application/json'
 }
 # Fetch all records
-def get_record_id_from_task_id(task_id):
+def get_record_id_from_task_id(target_task_id):
     response = requests.get(url, headers=headers)
     data = response.json()
-
-    target_task_id = task_id  # Assuming task_id is stored as a string
-    record_id = None
-    for record in data.get('records', []):
-        if record['fields'].get('task_id') == target_task_id:
-            record_id = record['id']
-            return record_id
-
-    if record_id:
-        print(f"Record ID: {record_id}")
-    else:
-        print("No record found")
+    records = data.get('records', [])
+    for record in records:
+        task_id = record['fields']['Task Id (from Task)']
+        if task_id == target_task_id:
+            return record['id']
+    return None
 
 def set_to_wip(record_id):
     data = {
@@ -34,42 +28,39 @@ def set_to_wip(record_id):
             "status": "in_progress"
         }
     }
-    update_url = f'https://api.airtable.com/v0/appCRqdHpEGeE1cE7/Tasks/{record_id}'
+    update_url = f'https://api.airtable.com/v0/appv7hUQouIL8ckzC/Writing%20Subtask/{record_id}'
     response = requests.patch(update_url, headers=headers, data=json.dumps(data))
     print(response.text)
 
 # Design the data
-def prepare_data(labeler_email, model_left, model_right, model_1_accuracy_score, model_1_relevance_score, model_1_readability_score, model_2_accuracy_score, model_2_relevance_score, model_2_readability_score, preferred_model, model_1_output, model_2_output):
+def prepare_data(model_a, model_b, model_c, model_a_response, model_b_response, model_c_response):
     return {
         "fields": {
-            "labeler_email": labeler_email,
-            "model_1": model_left,
-            "model_2": model_right,
-            "model_1_accuracy_score": model_1_accuracy_score,
-            "model_1_relevance_score": model_1_relevance_score,
-            "model_1_readability_score": model_1_readability_score,
-            "model_2_accuracy_score": model_2_accuracy_score,
-            "model_2_relevance_score": model_2_relevance_score,
-            "model_2_readability_score": model_2_readability_score,
-            "preferred_model": preferred_model,
-            "model_1_output": model_1_output,
-            "model_2_output": model_2_output
+            "Model A Model Name": model_a,
+            "Model B Model Name": model_b,
+            "Model C Model Name": model_c,
+            "Model A Response": model_a_response,
+            "Model B Response": model_b_response,
+            "Model C Response": model_c_response,
         }
     }
 
 # 
 def update_matching_record(record_id, data):
-    update_url = f'https://api.airtable.com/v0/appCRqdHpEGeE1cE7/Tasks/{record_id}'
+    update_url = f'https://api.airtable.com/v0/appv7hUQouIL8ckzC/Writing%20Subtask/{record_id}'
     response = requests.patch(update_url, headers=headers, data=json.dumps(data))
     print(response.text)
 
-def insertion_wrapper(record_id, labeler_email, model_left, model_right, model_1_accuracy_score, model_1_relevance_score, model_1_readability_score, model_2_accuracy_score, model_2_relevance_score, model_2_readability_score, preferred_model, model_1_output, model_2_output ):
+def insertion_wrapper(record_id, model_a, model_b, model_c, model_a_response, model_b_response, model_c_response):
     # record_id = get_record_id_from_task_id(task_id)
-    patch_data = prepare_data(labeler_email, model_left, model_right, model_1_accuracy_score, model_1_relevance_score, model_1_readability_score, model_2_accuracy_score, model_2_relevance_score, model_2_readability_score, preferred_model, model_1_output, model_2_output)
+    patch_data = prepare_data(model_a, model_b, model_c, model_a_response, model_b_response, model_c_response)
     update_matching_record(record_id, patch_data)
 
 if __name__ == "__main__":
-    # insertion_wrapper(11, 'akshgarg@gmail.com', 'gpt-4o', 'gpt-4o', 0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 'Model 1', 'output', 'output')
 
-    record_id = get_record_id_from_task_id(11)
-    set_to_wip(record_id)
+    record_id = get_record_id_from_task_id([1])
+    insertion_wrapper(record_id, 'gemini', 'gpt-4o', 'claude', 'output a', 'output b', 'output c')
+
+    # set_to_wip(record_id)
+
+
