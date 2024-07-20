@@ -6,8 +6,12 @@ import urllib
 import streamlit as st
 import llm_openrouter as llm
 from add_to_airtable import insertion_wrapper, set_to_wip, get_record_id_from_task_id
+from streamlit_extras.stylable_container import stylable_container
 
 st.set_page_config(page_title="Multi LLM Test Tool", layout="wide")
+
+
+
 
 
 specific_model_ids = [
@@ -108,16 +112,28 @@ def show_response(response: dict[llm.Model, llm.LLMResponse], cost_and_stats: di
                 st.session_state['model_outputs'] = []
             st.session_state['model_outputs'].append(r.response)
 
-    if st.button("Submit Evaluation (This will log your answers to airtable, please make sure at least one model is failing)"):
-        model_c_response = llm.chat_completion_multiple(
-            [st.session_state.third_model], st.session_state.prompt, user_input, st.session_state.temperature, st.session_state.max_tokens
-        )
-        model_c_response = model_c_response[st.session_state.third_model].response
-        model_a_name = st.session_state.models[0].name
-        model_b_name = st.session_state.models[1].name
-        model_c_name = st.session_state.third_model.name
-        model_a_response = st.session_state.response[st.session_state.models[0]].response
-        model_b_response = st.session_state.response[st.session_state.models[1]].response
+    st.header("")
+    # cols = st.columns(3)
+    # with cols[1]:
+    with stylable_container(
+        "green",
+        css_styles="""
+        button {
+            background-color: #6366f1;
+            color: white;
+        }
+        """
+    ):
+        if st.button("Submit Evaluation (This will log your answers to airtable, please make sure at least one model is failing)"):
+            model_c_response = llm.chat_completion_multiple(
+                [st.session_state.third_model], st.session_state.prompt, user_input, st.session_state.temperature, st.session_state.max_tokens
+            )
+            model_c_response = model_c_response[st.session_state.third_model].response
+            model_a_name = st.session_state.models[0].name
+            model_b_name = st.session_state.models[1].name
+            model_c_name = st.session_state.third_model.name
+            model_a_response = st.session_state.response[st.session_state.models[0]].response
+            model_b_response = st.session_state.response[st.session_state.models[1]].response
 
         # print(f'model_a_name: {model_a_name}')
         # print(f'model_b_name: {model_b_name}')
@@ -290,10 +306,55 @@ st.markdown("---")  # Add a horizontal line for better separation
 prepare_session_state()
 
 configuration()
+st.markdown("""
+<style>
+.expandable-textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: vertical;
+}
+</style>
+""", unsafe_allow_html=True)
 
-user_input = st.text_area("Input Prompt", placeholder="Enter the prompt here", height=100)
+user_input = st.text_area("Input Prompt", placeholder="Enter the prompt here", height=400, key="expandable_input", help="Type your prompt here. The text area will expand as you type.")
+# user_input = st.text_area("Input Prompt", placeholder="Enter the prompt here", height=100)
 read_and_agreed = True
-send_button = st.button("Send Request")
+# send_button = st.button("Send Request")
+
+st.markdown("<br>", unsafe_allow_html=True)  # Add space above the button
+with stylable_container(
+        "green",
+        css_styles="""
+        button {
+            background-color: #6366f1;
+            color: white;
+        }
+        """
+    ):
+    send_button = st.button("Send Request", key="send_button", help="Click to send your request")
+
+# Add custom CSS for the button
+st.markdown("""
+<style>
+.stButton > button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    font-size: 18px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.stButton > button:hover {
+    background-color: #45a049;
+}
+</style>
+""", unsafe_allow_html=True)
 
 if send_button:
     st.session_state['record_id'] = get_record_id_from_task_id([int(task_id)])
