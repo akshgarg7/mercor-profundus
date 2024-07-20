@@ -6,7 +6,7 @@ import urllib
 import streamlit as st
 import llm_openrouter as llm
 from add_to_airtable import insertion_wrapper, set_to_wip, get_record_id_from_task_id
-from streamlit_extras.stylable_container import stylable_container
+# from streamlit_extras.stylable_container import stylable_container
 
 st.set_page_config(page_title="Multi LLM Test Tool", layout="wide")
 
@@ -115,25 +115,25 @@ def show_response(response: dict[llm.Model, llm.LLMResponse], cost_and_stats: di
     st.header("")
     # cols = st.columns(3)
     # with cols[1]:
-    with stylable_container(
-        "green",
-        css_styles="""
-        button {
-            background-color: #6366f1;
-            color: white;
-        }
-        """
-    ):
-        if st.button("Submit Evaluation (This will log your answers to airtable, please make sure at least one model is failing)"):
-            model_c_response = llm.chat_completion_multiple(
-                [st.session_state.third_model], st.session_state.prompt, user_input, st.session_state.temperature, st.session_state.max_tokens
-            )
-            model_c_response = model_c_response[st.session_state.third_model].response
-            model_a_name = st.session_state.models[0].name
-            model_b_name = st.session_state.models[1].name
-            model_c_name = st.session_state.third_model.name
-            model_a_response = st.session_state.response[st.session_state.models[0]].response
-            model_b_response = st.session_state.response[st.session_state.models[1]].response
+    # with stylable_container(
+    #     "green",
+    #     css_styles="""
+    #     button {
+    #         background-color: #6366f1;
+    #         color: white;
+    #     }
+    #     """
+    # ):
+    if st.button("Submit Evaluation (This will log your answers to airtable, please make sure at least one model is failing)", type='primary'):
+        model_c_response = llm.chat_completion_multiple(
+            [st.session_state.third_model], st.session_state.prompt, user_input, st.session_state.temperature, st.session_state.max_tokens
+        )
+        model_c_response = model_c_response[st.session_state.third_model].response
+        model_a_name = st.session_state.models[0].name
+        model_b_name = st.session_state.models[1].name
+        model_c_name = st.session_state.third_model.name
+        model_a_response = st.session_state.response[st.session_state.models[0]].response
+        model_b_response = st.session_state.response[st.session_state.models[1]].response
 
         # print(f'model_a_name: {model_a_name}')
         # print(f'model_b_name: {model_b_name}')
@@ -326,16 +326,16 @@ read_and_agreed = True
 # send_button = st.button("Send Request")
 
 st.markdown("<br>", unsafe_allow_html=True)  # Add space above the button
-with stylable_container(
-        "green",
-        css_styles="""
-        button {
-            background-color: #6366f1;
-            color: white;
-        }
-        """
-    ):
-    send_button = st.button("Send Request", key="send_button", help="Click to send your request")
+# with stylable_container(
+#         "green",
+#         css_styles="""
+#         button {
+#             background-color: #6366f1;
+#             color: white;
+#         }
+#         """
+#     ):
+send_button = st.button("Send Request", key="send_button", help="Click to send your request", type='primary')
 
 # Add custom CSS for the button
 st.markdown("""
