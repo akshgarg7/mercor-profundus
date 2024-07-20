@@ -1,6 +1,7 @@
 python-dotenv ~= 1.0.0
 requests ~= 2.31.0
 streamlit ~= 1.29.0
+streamlit-extras ~= 0.2.1
 
 # Tools - use the latest
 ruff
