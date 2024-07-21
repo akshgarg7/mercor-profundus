@@ -74,7 +74,7 @@ def update_matching_record(record_id, data):
 
 def insertion_wrapper(record_id, prompt, model_a, model_b, model_c, model_a_response, model_b_response, model_c_response):
     # record_id = get_record_id_from_task_id(task_id)
-    patch_data = prepare_data(propmt, model_a, model_b, model_c, model_a_response, model_b_response, model_c_response)
+    patch_data = prepare_data(prompt, model_a, model_b, model_c, model_a_response, model_b_response, model_c_response)
     update_matching_record(record_id, patch_data)
 
 
