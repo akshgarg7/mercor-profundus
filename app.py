@@ -26,8 +26,10 @@ headers = {
 }
 # Fetch all records
 def get_record_id_from_task_id(target_task_id):
+    st.markdown(headers)
     response = requests.get(url, headers=headers)
     data = response.json()
+    st.markdown(data)
     records = data.get('records', [])
     st.header('hi')
     st.header(records)
