@@ -50,9 +50,10 @@ def set_to_wip(record_id):
     print(response.text)
 
 # Design the data
-def prepare_data(model_a, model_b, model_c, model_a_response, model_b_response, model_c_response):
+def prepare_data(prompt, model_a, model_b, model_c, model_a_response, model_b_response, model_c_response):
     return {
         "fields": {
+            "Propmt": pompt,
             "Model A Model Name": model_a,
             "Model B Model Name": model_b,
             "Model C Model Name": model_c,
@@ -71,9 +72,9 @@ def update_matching_record(record_id, data):
     response = requests.patch(update_url, headers=get_headers, data=json.dumps(data))
     print(response.text)
 
-def insertion_wrapper(record_id, model_a, model_b, model_c, model_a_response, model_b_response, model_c_response):
+def insertion_wrapper(record_id, prompt, model_a, model_b, model_c, model_a_response, model_b_response, model_c_response):
     # record_id = get_record_id_from_task_id(task_id)
-    patch_data = prepare_data(model_a, model_b, model_c, model_a_response, model_b_response, model_c_response)
+    patch_data = prepare_data(propmt, model_a, model_b, model_c, model_a_response, model_b_response, model_c_response)
     update_matching_record(record_id, patch_data)
 
 
@@ -299,7 +300,7 @@ import pandas as pd
 import os
 
 def log_evaluation_data(model_a, model_b, model_c, model_a_response, model_b_response, model_c_response):
-    insertion_wrapper(st.session_state['record_id'], model_a, model_b, model_c, model_a_response, model_b_response, model_c_response)
+    insertion_wrapper(st.session_state['record_id'], user_input, model_a, model_b, model_c, model_a_response, model_b_response, model_c_response)
 
 # def log_evaluation_data(email, model_left, model_right, accuracy1, relevance1, conciseness1, accuracy2, relevance2, conciseness2, preferred_model, reason_for_preference):
 #     # Define the path for the CSV file
