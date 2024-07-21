@@ -357,7 +357,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 if send_button:
-    st.session_state['record_id'] = get_record_id_from_task_id([int(task_id)])
+    st.session_state['record_id'] = get_record_id_from_task_id(int(task_id))
     # set_to_wip(st.session_state['record_id'])
     if not read_and_agreed:
         st.error("Please confirm that there is no private or sensitive information in your request")
