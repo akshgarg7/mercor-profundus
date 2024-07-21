@@ -209,10 +209,10 @@ def chat_completion(
         "HTTP-Referer": _REFERER,
     }
 
-    url = f"{_OPENROUTER_API}/chat/completions"
+    openrouter_url = f"{_OPENROUTER_API}/chat/completions"
 
     start_time = time.time()
-    http_response = requests.post(url=url, json=payload, headers=headers, timeout=120)
+    http_response = requests.post(url=openrouter_url, json=payload, headers=headers, timeout=120)
     elapsed_time = time.time() - start_time
 
     # Raise an exception with model name to help debugging
