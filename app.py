@@ -29,6 +29,8 @@ def get_record_id_from_task_id(target_task_id):
     response = requests.get(url, headers=headers)
     data = response.json()
     records = data.get('records', [])
+    st.header('hi')
+    st.header(records)
     print(records)
     for record in records:
         task_id = record['fields']['Subtask Id']
