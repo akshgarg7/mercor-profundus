@@ -19,20 +19,19 @@ dotenv.load_dotenv()
 st.set_page_config(page_title="Multi LLM Test Tool", layout="wide")
 
 
-url = 'https://api.airtable.com/v0/appv7hUQouIL8ckzC/Writing%20Subtask?maxRecords=3&view=Grid%20view'
-headers = {
+get_url = 'https://api.airtable.com/v0/appv7hUQouIL8ckzC/Writing%20Subtask?maxRecords=3&view=Grid%20view'
+get_headers = {
     'Authorization': 'Bearer ' + os.getenv('AIRTABLE_API_KEY'),
     'Content-Type': 'application/json'
 }
 # Fetch all records
 def get_record_id_from_task_id(target_task_id):
-    st.markdown(headers)
-    response = requests.get(url, headers=headers)
+    st.markdown(get_headers)
+    response = requests.get(get_url, headers=get_headers)
     data = response.json()
     st.markdown(data)
     records = data.get('records', [])
-    st.header('hi')
-    st.header(records)
+    # st.header(records)
     print(records)
     for record in records:
         task_id = record['fields']['Subtask Id']
