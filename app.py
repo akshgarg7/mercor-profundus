@@ -19,20 +19,20 @@ dotenv.load_dotenv()
 st.set_page_config(page_title="Multi LLM Test Tool", layout="wide")
 
 
-get_url = 'https://api.airtable.com/v0/appv7hUQouIL8ckzC/Writing%20Subtask?maxRecords=3&view=Grid%20view'
+get_url = 'https://api.airtable.com/v0/appv7hUQouIL8ckzC/Writing%20Subtask/?maxRecords=1000&view=Grid%20view'
 get_headers = {
     'Authorization': 'Bearer ' + os.getenv('AIRTABLE_API_KEY'),
     'Content-Type': 'application/json'
 }
 # Fetch all records
 def get_record_id_from_task_id(target_task_id):
-    st.markdown(get_headers)
+    # st.markdown(get_headers)
     response = requests.get(get_url, headers=get_headers)
     data = response.json()
-    st.markdown(data)
+    # st.markdown(data)
     records = data.get('records', [])
     # st.header(records)
-    print(records)
+    # print(records)
     for record in records:
         task_id = record['fields']['Subtask Id']
         if task_id == target_task_id:
@@ -46,7 +46,7 @@ def set_to_wip(record_id):
         }
     }
     update_url = f'https://api.airtable.com/v0/appv7hUQouIL8ckzC/Writing%20Subtask/{record_id}'
-    response = requests.patch(update_url, headers=headers, data=json.dumps(data))
+    response = requests.patch(update_url, headers=get_headers, data=json.dumps(data))
     print(response.text)
 
 # Design the data
@@ -65,7 +65,10 @@ def prepare_data(model_a, model_b, model_c, model_a_response, model_b_response, 
 # 
 def update_matching_record(record_id, data):
     update_url = f'https://api.airtable.com/v0/appv7hUQouIL8ckzC/Writing%20Subtask/{record_id}'
-    response = requests.patch(update_url, headers=headers, data=json.dumps(data))
+    print("Headers:", get_headers)
+    print("Update URL:", update_url)
+    print("Data:", json.dumps(data))
+    response = requests.patch(update_url, headers=get_headers, data=json.dumps(data))
     print(response.text)
 
 def insertion_wrapper(record_id, model_a, model_b, model_c, model_a_response, model_b_response, model_c_response):
@@ -420,7 +423,7 @@ st.markdown("""
 
 if send_button:
     st.session_state['record_id'] = get_record_id_from_task_id(int(task_id))
-    st.markdown(f"record_id: {st.session_state['record_id']}")
+    # st.markdown(f"record_id: {st.session_state['record_id']}")
     # set_to_wip(st.session_state['record_id'])
     if not read_and_agreed:
         st.error("Please confirm that there is no private or sensitive information in your request")
