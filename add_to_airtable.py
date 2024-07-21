@@ -11,6 +11,7 @@ headers = {
     'Authorization': 'Bearer ' + os.getenv('AIRTABLE_API_KEY'),
     'Content-Type': 'application/json'
 }
+print(f"AIRTABLE API KEY: {os.getenv('AIRTABLE_API_KEY')}")
 # Fetch all records
 def get_record_id_from_task_id(target_task_id):
     response = requests.get(url, headers=headers)
