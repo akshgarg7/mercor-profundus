@@ -36,7 +36,7 @@ def get_models():
 
 def prepare_session_state():
     # print(f"AIRTABLE API KEY: {os.getenv('AIRTABLE_API_KEY')}")
-    st.header(f"AIRTABLE API KEY: {os.getenv('AIRTABLE_API_KEY')}")
+    # st.header(f"AIRTABLE API KEY: {os.getenv('AIRTABLE_API_KEY')}")
     models = get_models()
     gemini_models_parsed = [model for model in models if model.id in gemini_models]
     first_model = random.choice(gemini_models_parsed)
