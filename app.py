@@ -5,6 +5,7 @@ import random
 import urllib
 import streamlit as st
 import llm_openrouter as llm
+import dotenv
 # from add_to_airtable import insertion_wrapper, set_to_wip, get_record_id_from_task_id
 # from streamlit_extras.stylable_container import stylable_container
 
