@@ -53,7 +53,7 @@ def set_to_wip(record_id):
 def prepare_data(prompt, model_a, model_b, model_c, model_a_response, model_b_response, model_c_response):
     return {
         "fields": {
-            "Propmt": pompt,
+            "Prompt": prompt,
             "Model A Model Name": model_a,
             "Model B Model Name": model_b,
             "Model C Model Name": model_c,
