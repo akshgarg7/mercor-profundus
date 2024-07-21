@@ -8,7 +8,6 @@ import llm_openrouter as llm
 import dotenv
 import os
 import requests
-import requests
 import json
 import dotenv 
 import os 
@@ -30,6 +29,7 @@ def get_record_id_from_task_id(target_task_id):
     response = requests.get(url, headers=headers)
     data = response.json()
     records = data.get('records', [])
+    print(records)
     for record in records:
         task_id = record['fields']['Subtask Id']
         if task_id == target_task_id:
