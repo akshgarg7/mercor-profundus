@@ -128,7 +128,7 @@ def prepare_session_state():
 
 def configuration():
     models = st.session_state.models
-    st.session_state.prompt = "You are a helpful assistant"
+    st.session_state.prompt = ""
     st.session_state.temperature = 0
     st.session_state.max_tokens = 2048
 
