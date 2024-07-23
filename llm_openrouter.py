@@ -192,6 +192,39 @@ def cost_and_stats(response: LLMResponse) -> LLMCostAndStats:
 def chat_completion(
     model: str, prompt: str, user_input: str, temperature: float = 0.0, max_tokens: int = 2048
 ) -> LLMResponse:
+
+    response = LLMResponse()
+    # response = LLMResponse()
+
+    if model == 'google/gemini-pro-1.5':
+        headers = {
+            'Content-Type': 'application/json'
+        }
+
+        data = {
+            "contents": [
+                {
+                    "parts": [
+                        {
+                            "text": user_input
+                        }
+                    ]
+                }
+            ]
+        }
+
+        params = {
+            'key': os.environ['GEMINI_KEY']
+        }
+
+        returned_answer = requests.post(os.environ['GEMINI_URL'], headers=headers, json=data, params=params)
+        returned_answer = returned_answer.json()
+        response.response = returned_answer['candidates'][0]['content']['parts'][0]['text']
+        response.model = model
+        response.prompt = prompt
+        response.user_input = user_input
+        return response
+
     """Get a chat completion from the specified model."""
     payload = {
         "model": model,
@@ -225,7 +258,6 @@ def chat_completion(
     # Record the request and the response
     # We use the keys without checking if they exist because we want to know if the API changes (it will result
     # in a hard failure that makes the change obvious)
-    response = LLMResponse()
     response.elapsed_time = elapsed_time
     response.id = data["id"]
     response.model = model

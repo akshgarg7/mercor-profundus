@@ -167,6 +167,7 @@ def show_response(response: dict[llm.Model, llm.LLMResponse], cost_and_stats: di
     # Show the response side by side by model
     cols = st.columns(len(response))
     for i, (m, r) in enumerate(response.items()):
+        print(r)
         with cols[i]:
             st.markdown(f"### Model {i+1}")
             st.markdown(f"""
