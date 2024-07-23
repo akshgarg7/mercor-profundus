@@ -11,6 +11,7 @@ import requests
 import json
 import dotenv 
 import os 
+import re
 # from add_to_airtable import insertion_wrapper, set_to_wip, get_record_id_from_task_id
 # from streamlit_extras.stylable_container import stylable_container
 
@@ -159,6 +160,19 @@ def get_cost_and_stats(response: dict[llm.Model, llm.LLMResponse]) -> dict[llm.M
         cost_and_stats = llm.cost_and_stats_multiple(response)
     return cost_and_stats
 
+def rewrite_markdown(input_text):
+    # Regular expression to match code blocks with a language tag
+    pattern = re.compile(r'```(\w+)\n(.*?)\n```', re.DOTALL)
+    
+    # Function to replace matched code blocks with regular markdown
+    def replace_code_block(match):
+        code = match.group(2)  # Extract the code content
+        return f'```\n{code}\n```'
+    
+    # Substitute all matching code blocks
+    result = pattern.sub(replace_code_block, input_text)
+    
+    return result
 
 def show_response(response: dict[llm.Model, llm.LLMResponse], cost_and_stats: dict[llm.Model, llm.LLMCostAndStats]):
     # Sort the response by model name to keep the order consistent
@@ -177,12 +191,14 @@ def show_response(response: dict[llm.Model, llm.LLMResponse], cost_and_stats: di
 # {r.response.strip()}
 # </div>
 #             """.strip())
+
+            print(rewrite_markdown(r.response.strip()))
             st.markdown(f"""
-{r.response.strip()}
+{rewrite_markdown(r.response.strip())}
             """.strip(), unsafe_allow_html=True) 
             if 'model_outputs' not in st.session_state:
                 st.session_state['model_outputs'] = []
-            st.session_state['model_outputs'].append(r.response)
+            st.session_state['model_outputs'].append(rewrite_markdown(r.response.strip()))
 
     st.header("")
     # cols = st.columns(3)
@@ -201,6 +217,7 @@ def show_response(response: dict[llm.Model, llm.LLMResponse], cost_and_stats: di
             [st.session_state.third_model], st.session_state.prompt, user_input, st.session_state.temperature, st.session_state.max_tokens
         )
         model_c_response = model_c_response[st.session_state.third_model].response
+        model_c_response = rewrite_markdown(model_c_response.strip())
         model_a_name = st.session_state.models[0].name
         model_b_name = st.session_state.models[1].name
         model_c_name = st.session_state.third_model.name

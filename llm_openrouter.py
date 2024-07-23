@@ -210,7 +210,11 @@ def chat_completion(
                         }
                     ]
                 }
-            ]
+            ], 
+            "generationConfig": {
+                "temperature": 0.0,
+                "seed": 0
+            }
         }
 
         params = {
