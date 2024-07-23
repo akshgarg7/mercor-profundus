@@ -167,14 +167,19 @@ def show_response(response: dict[llm.Model, llm.LLMResponse], cost_and_stats: di
     # Show the response side by side by model
     cols = st.columns(len(response))
     for i, (m, r) in enumerate(response.items()):
-        print(r)
+        # print(r)
+        print('-----------------------------------')
         with cols[i]:
             st.markdown(f"### Model {i+1}")
+
+#             print(f"""
+# <div style="border:2px solid #ccc; border-radius: 5px; padding: 10px; margin-top: 5px;">
+# {r.response.strip()}
+# </div>
+#             """.strip())
             st.markdown(f"""
-                <div style="border:2px solid #ccc; border-radius: 5px; padding: 10px; margin-top: 5px;">
-                    {r.response}
-                </div>
-            """, unsafe_allow_html=True) 
+{r.response.strip()}
+            """.strip(), unsafe_allow_html=True) 
             if 'model_outputs' not in st.session_state:
                 st.session_state['model_outputs'] = []
             st.session_state['model_outputs'].append(r.response)
