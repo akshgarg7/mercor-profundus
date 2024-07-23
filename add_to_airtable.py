@@ -11,16 +11,6 @@ headers = {
     'Authorization': 'Bearer ' + os.getenv('AIRTABLE_API_KEY'),
     'Content-Type': 'application/json'
 }
-# Fetch all records
-def get_record_id_from_task_id(target_task_id):
-    response = requests.get(url, headers=headers)
-    data = response.json()
-    records = data.get('records', [])
-    for record in records:
-        task_id = record['fields']['Subtask Id']
-        if task_id == target_task_id:
-            return record['id']
-    return None
 
 def set_to_wip(record_id):
     data = {
@@ -52,13 +42,12 @@ def update_matching_record(record_id, data):
     print(response.text)
 
 def insertion_wrapper(record_id, model_a, model_b, model_c, model_a_response, model_b_response, model_c_response):
-    # record_id = get_record_id_from_task_id(task_id)
     patch_data = prepare_data(model_a, model_b, model_c, model_a_response, model_b_response, model_c_response)
     update_matching_record(record_id, patch_data)
 
 if __name__ == "__main__":
 
-    record_id = get_record_id_from_task_id(188)
+    record_id = "recvFYTzQowmgX9fe"
     insertion_wrapper(record_id, 'gemini', 'gpt-4o', 'claude', 'output a that i just generated', 'output b', 'output c')
 
     # set_to_wip(record_id)
