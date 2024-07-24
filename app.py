@@ -201,10 +201,7 @@ def get_filled_data(record_id):
     saved_prompt = data['fields'].get('Prompt', "")
     return saved_prompt == ""
 
-if 'overwrite_prompt' not in st.session_state:
-    st.session_state.overwrite_prompt = False
-
-checkbox = st.checkbox("Overwrite Prompt", value=st.session_state.overwrite_prompt)
+checkbox = st.checkbox("Overwrite Prompt", value=False)
 ok_to_proceed = get_filled_data(st.session_state['record_id'])
 
 
@@ -217,18 +214,6 @@ if send_button:
         if not checkbox:
             st.warning("Please confirm that you want to overwrite the prompt and submit again")
             st.stop()
-
-    # ok_to_proceed = get_filled_data(st.session_state['record_id'])
-    # if not ok_to_proceed:
-    #     if not st.session_state.overwrite_prompt:
-    #         st.warning("Please confirm that you want to overwrite the prompt.")
-    #         checkbox = st.checkbox("Overwrite Prompt", value=st.session_state.overwrite_prompt)
-    #         while st.session_state.overwrite_prompt == False:
-    #             st.session_state.overwrite_prompt = checkbox
-    #             print(st.session_state.overwrite_prompt)
-    #             time.sleep(3)
-    #         st.session_state.overwrite_prompt = True
-    #         print(st.session_state.overwrite_prompt)
 
     st.session_state.response = get_llm_response(user_input)
 
