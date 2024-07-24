@@ -6,6 +6,7 @@ import dotenv
 import os
 import requests
 import re
+import time
 
 dotenv.load_dotenv()
 
@@ -69,7 +70,7 @@ def prepare_session_state():
     session_vars = {
         "prompt": "",
         "temperature": 0.0,
-        "max_tokens": 2048,
+        "max_tokens": 100000,
         "models": [first_model, second_model, third_model],
         "third_model": third_model,
         "response": {},
@@ -82,11 +83,6 @@ def prepare_session_state():
             if var == "models":
                 print(f"Selected models: {', '.join([model.name for model in st.session_state.models])}")
 
-
-def configuration():
-    st.session_state.prompt = ""
-    st.session_state.temperature = 0
-    st.session_state.max_tokens = 2048
 
 def get_llm_response(user_input: str) -> dict[llm.Model, llm.LLMResponse]:
     with st.spinner("Sending request..."):
@@ -160,7 +156,6 @@ st.markdown(f"**Frameworks Used:** {frameworks_used}")
 st.markdown("---")
 
 prepare_session_state()
-configuration()
 st.markdown("""
 <style>
 .expandable-textarea {
@@ -199,18 +194,39 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+def get_filled_data(record_id):
+    retrieval_url = f'https://api.airtable.com/v0/appv7hUQouIL8ckzC/Writing%20Subtask/{record_id}'
+    response = requests.get(retrieval_url, headers=get_headers)
+    data = response.json()
+    saved_prompt = data['fields'].get('Prompt', "")
+    return saved_prompt == ""
+
 if send_button:
-    if not read_and_agreed:
-        st.error("Please confirm that there is no private or sensitive information in your request")
-        st.stop()
-    if not st.session_state.models:
-        st.error("Please select at least one model")
-        st.stop()
     if not user_input:
         st.error("Please enter a request")
         st.stop()
 
-    st.session_state.response = get_llm_response(user_input)
+    ok_to_proceed = get_filled_data(st.session_state['record_id'])
+    if not ok_to_proceed:
+        overwrite = st.checkbox("Overwrite Prompt", help="Check this box to overwrite the prompt.")
+        st.warning("Please confirm that you want to overwrite the prompt.")
+        if overwrite:
+            st.session_state.response = get_llm_response(user_input)
+            # st.stop()
+        # have_printed = False
+        # while not overwrite:
+        #     if not have_printed:
+        #         st.warning("Please confirm that you want to overwrite the prompt.")
+        #         have_printed = True
+        #     time.sleep(2)
+
+        
+        
+    #     while not overwrite_prompt:
+    #         st.warning("Please confirm that you want to overwrite the prompt.")
+    
+    else:
+        st.session_state.response = get_llm_response(user_input)
 
 if st.session_state.response:
     show_response(st.session_state.response)

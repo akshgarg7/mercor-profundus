@@ -45,6 +45,8 @@ def prepare_data(model_a, model_b, model_c, model_a_response, model_b_response, 
         }
     }
 
+
+
 # 
 def update_matching_record(record_id, data):
     update_url = f'https://api.airtable.com/v0/appv7hUQouIL8ckzC/Writing%20Subtask/{record_id}'

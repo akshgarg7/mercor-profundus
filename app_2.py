@@ -467,7 +467,16 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+def get_filled_data(record_id):
+    retrieval_url = f'https://api.airtable.com/v0/appv7hUQouIL8ckzC/Writing%20Subtask/{record_id}'
+    response = requests.get(retrieval_url, headers=get_headers)
+    data = response.json()
+    prev_data = data['']
+    print(data)
+    # return data['fields']['']
 if send_button:
+    get_filled_data(st.session_state['record_id'])
+
     # st.session_state['record_id'] = get_record_id_from_task_id(int(task_id))
     # st.markdown(f"record_id: {st.session_state['record_id']}")
     # set_to_wip(st.session_state['record_id'])
