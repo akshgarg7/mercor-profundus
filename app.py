@@ -51,15 +51,8 @@ def update_matching_record(record_id, data):
 
 def insertion_wrapper(record_id, prompt, model_a, model_b, model_c, model_a_response, model_b_response, model_c_response):
     futures = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=7) as executor:
-        for i in range(15):
-            print(i)
-            patch_data = prepare_data(prompt + f"_{i}", model_a + f"_{i}", model_b, model_c, model_a_response, model_b_response, model_c_response)
-            futures.append(executor.submit(update_matching_record, record_id, patch_data))
-    
-    for future in concurrent.futures.as_completed(futures):
-        result = future.result()
-        update_matching_record(record_id, patch_data)
+    patch_data = prepare_data(prompt, model_a, model_b, model_c, model_a_response, model_b_response, model_c_response)
+    update_matching_record(record_id, patch_data)
 
 specific_model_ids = [
     'anthropic/claude-3.5-sonnet',
