@@ -7,6 +7,7 @@ import os
 import requests
 import re
 import time
+import concurrent.futures
 
 dotenv.load_dotenv()
 
@@ -33,11 +34,32 @@ def prepare_data(prompt, model_a, model_b, model_c, model_a_response, model_b_re
 
 def update_matching_record(record_id, data):
     update_url = f'https://api.airtable.com/v0/appv7hUQouIL8ckzC/Writing%20Subtask/{record_id}'
-    requests.patch(update_url, headers=get_headers, data=json.dumps(data))
+    max_retries = 5
+    for attempt in range(max_retries):  # New code starts here
+        try:
+            response = requests.patch(update_url, headers=get_headers, data=json.dumps(data))
+            response.raise_for_status()
+            break  # exit the retry loop if the request is successful
+        except requests.exceptions.RequestException as e:
+            if attempt < max_retries - 1:
+                wait_time = 2 ** attempt  # exponential backoff
+                st.warning(f"Airtable is experiencing some slowdown. Retrying in {wait_time} seconds...")
+                time.sleep(wait_time)
+            else:
+                st.error("Failed to update Airtable after multiple attempts. Please try again later.")
+                raise e  # New code ends here
 
 def insertion_wrapper(record_id, prompt, model_a, model_b, model_c, model_a_response, model_b_response, model_c_response):
-    patch_data = prepare_data(prompt, model_a, model_b, model_c, model_a_response, model_b_response, model_c_response)
-    update_matching_record(record_id, patch_data)
+    futures = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=7) as executor:
+        for i in range(15):
+            print(i)
+            patch_data = prepare_data(prompt + f"_{i}", model_a + f"_{i}", model_b, model_c, model_a_response, model_b_response, model_c_response)
+            futures.append(executor.submit(update_matching_record, record_id, patch_data))
+    
+    for future in concurrent.futures.as_completed(futures):
+        result = future.result()
+        update_matching_record(record_id, patch_data)
 
 specific_model_ids = [
     'anthropic/claude-3.5-sonnet',
@@ -199,10 +221,22 @@ st.markdown("""
 
 def get_filled_data(record_id):
     retrieval_url = f'https://api.airtable.com/v0/appv7hUQouIL8ckzC/Writing%20Subtask/{record_id}'
-    response = requests.get(retrieval_url, headers=get_headers)
-    data = response.json()
-    saved_prompt = data['fields'].get('Prompt', "")
-    return saved_prompt == ""
+    max_retries = 5
+    for attempt in range(max_retries):  # New code starts here
+        try:
+            response = requests.get(retrieval_url, headers=get_headers)
+            response.raise_for_status()
+            data = response.json()
+            saved_prompt = data['fields'].get('Prompt', "")
+            return saved_prompt == ""
+        except requests.exceptions.RequestException as e:
+            if attempt < max_retries - 1:
+                wait_time = 2 ** attempt
+                st.warning(f"Airtable is experiencing some slowdown. Retrying in {wait_time} seconds...")
+                time.sleep(wait_time)
+            else:
+                st.error("Failed to retrieve data from Airtable after multiple attempts. Please try again later.")
+                raise e  # New code ends here
 
 checkbox = st.checkbox("Overwrite Prompt", value=False)
 ok_to_proceed = get_filled_data(st.session_state['record_id'])
