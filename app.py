@@ -176,6 +176,9 @@ read_and_agreed = True
 st.markdown("<br>", unsafe_allow_html=True)
 send_button = st.button("Send Request", key="send_button", help="Click to send your request", type='primary')
 
+if send_button:
+    st.session_state['send_button_clicked'] = True
+
 st.markdown("""
 <style>
 .stButton > button {
@@ -207,15 +210,19 @@ ok_to_proceed = get_filled_data(st.session_state['record_id'])
 
 if send_button:
     if not user_input:
+        st.session_state['send_button_clicked'] = False
+        st.session_state['response'] = None
         st.error("Please enter a request")
         st.stop()
 
     if not ok_to_proceed and not checkbox:
-        if not checkbox:
-            st.warning("Please confirm that you want to overwrite the prompt and submit again")
-            st.stop()
+        st.session_state['send_button_clicked'] = False
+        st.session_state['response'] = None
+        st.warning("Please confirm that you want to overwrite the prompt and submit again")
+        st.stop()
 
     st.session_state.response = get_llm_response(user_input)
+    st.session_state.send_button_clicked = False
 
 if st.session_state.response:
     show_response(st.session_state.response)
