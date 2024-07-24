@@ -131,7 +131,7 @@ def show_response(response: dict[llm.Model, llm.LLMResponse]):
         if i >= 2: 
             continue
         with cols[i]:
-            st.markdown(f"### Model {m.name}")
+            # st.markdown(f"### Model {m.name}")
             st.markdown(f"""
 {rewrite_markdown(r.response.strip())}
             """.strip(), unsafe_allow_html=True)
