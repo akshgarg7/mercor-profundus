@@ -131,7 +131,7 @@ def show_response(response: dict[llm.Model, llm.LLMResponse]):
         if i >= 2: 
             continue
         with cols[i]:
-            # st.markdown(f"### Model {m.name}")
+            st.markdown(f"### Model {m.name}")
             st.markdown(f"""
 {rewrite_markdown(r.response.strip())}
             """.strip(), unsafe_allow_html=True)
@@ -221,7 +221,8 @@ def get_filled_data(record_id):
             response.raise_for_status()
             data = response.json()
             saved_prompt = data['fields'].get('Prompt', "")
-            return saved_prompt == ""
+            submitted = data['fields'].get('Status', "")
+            return saved_prompt == "", submitted == "Done"
         except requests.exceptions.RequestException as e:
             if attempt < max_retries - 1:
                 wait_time = 2 ** attempt
@@ -230,12 +231,16 @@ def get_filled_data(record_id):
             else:
                 st.error("Failed to retrieve data from Airtable after multiple attempts. Please try again later.")
                 raise e  # New code ends here
-
+            
 checkbox = st.checkbox("Overwrite Prompt", value=False)
-ok_to_proceed = get_filled_data(st.session_state['record_id'])
+ok_to_proceed, already_submitted = get_filled_data(st.session_state['record_id'])
 
 
 if send_button:
+    if already_submitted:
+        st.error("You can not modify an already submitted response. Contact Sid for assistance")
+        st.stop() 
+
     if not user_input:
         st.session_state['send_button_clicked'] = False
         st.session_state['response'] = None
@@ -260,3 +265,4 @@ if st.session_state.response:
             "response": response.to_dict(),
         }
     response_json = json.dumps(response_json, indent=4)
+
